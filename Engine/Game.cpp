@@ -31,6 +31,14 @@ Game::Game(MainWindow& wnd)
 	rng(std::random_device()()),
 	snek({ 2,2 })
 {
+	for (int i = 0; i < nPoison; i++)
+	{
+		brd.SpawnContents(rng, snek, 3);
+	}
+	for (int i = 0; i < nFood; i++)
+	{
+		brd.SpawnContents(rng, snek, 2);
+	}
 	brd.SpawnContents(rng, snek, 2);
 	sndTitle.Play( 1.0f,1.0f );
 }
@@ -79,27 +87,33 @@ void Game::UpdateModel()
 				const Location next = snek.GetNextHeadLocation( delta_loc );
 				const int contents = brd.GetContents(next);
 				if( !brd.IsInsideBoard( next ) ||
-					snek.IsInTileExceptEnd( next ) || contents == 1 )
+					snek.IsInTileExceptEnd( next ) || 
+					contents == 1 )
 				{
 					gameIsOver = true;
 					sndFart.Play();
 					sndMusic.StopAll();
 				}
+				else if (contents == 2)
+				{
+					snek.GrowAndMoveBy(delta_loc);
+					brd.ConsumeContents(next);
+					brd.SpawnContents(rng, snek, 2);
+					brd.SpawnContents(rng, snek, 1);
+					sfxEat.Play(rng, 0.8f);
+				}
+				else if (contents == 3)
+				{
+					snek.MoveBy(delta_loc);
+					brd.ConsumeContents(next);
+					brd.SpawnContents(rng, snek, 3);
+					snekMovePeriod = std::max(snekMovePeriod * snekSpeedupFactor, snekMovePeriodMin);
+					sndFart.Play();
+				}
 				else
 				{
-					if( contents == 2 )
-					{
-						snek.GrowAndMoveBy( delta_loc );
-						brd.ConsumeContents(next);
-						brd.SpawnContents(rng, snek, 2);
-						brd.SpawnContents(rng, snek, 1);
-						sfxEat.Play( rng,0.8f );
-					}
-					else
-					{
-						snek.MoveBy( delta_loc );
-					}
-					sfxSlither.Play( rng,0.08f );
+					snek.MoveBy( delta_loc );
+					sfxSlither.Play(rng, 0.08f);
 				}
 			}
 			snekMovePeriod = std::max( snekMovePeriod - dt * snekSpeedupFactor,snekMovePeriodMin );

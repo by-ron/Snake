@@ -21,6 +21,7 @@ private:
 	static constexpr Color borderColor = Colors::Blue;
 	static constexpr Color obstacleColor = Colors::Gray;
 	static constexpr Color foodColor = Colors::Red;
+	static constexpr Color poisonColor = Colors::Magenta;
 	static constexpr int dimension = 20;
 	static constexpr int cellPadding = 1;
 	static constexpr int width = 32;
