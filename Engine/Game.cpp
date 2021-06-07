@@ -26,11 +26,12 @@ Game::Game(MainWindow& wnd)
 	:
 	wnd(wnd),
 	gfx(wnd),
+
 	brd(gfx),
 	rng(std::random_device()()),
 	snek({ 2,2 })
 {
-	brd.SpawnFood(rng, snek);
+	brd.SpawnContents(rng, snek, 2);
 	sndTitle.Play( 1.0f,1.0f );
 }
 
@@ -90,8 +91,8 @@ void Game::UpdateModel()
 					{
 						snek.GrowAndMoveBy( delta_loc );
 						brd.ConsumeContents(next);
-						brd.SpawnFood(rng, snek);
-						brd.SpawnObstacle(rng, snek);
+						brd.SpawnContents(rng, snek, 2);
+						brd.SpawnContents(rng, snek, 1);
 						sfxEat.Play( rng,0.8f );
 					}
 					else
