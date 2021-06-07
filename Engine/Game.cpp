@@ -66,14 +66,18 @@ void Game::UpdateModel()
 			{
 				delta_loc = { 1,0 };
 			}
-
-			snekMoveCounter += dt;
-			if( snekMoveCounter >= snekMovePeriod )
+			float snekModifiedMovePeriod = snekMovePeriodSpeedUp;
+			if (wnd.kbd.KeyIsPressed(VK_CONTROL))
 			{
-				snekMoveCounter -= snekMovePeriod;
+				snekModifiedMovePeriod = std::min(snekMovePeriod, snekMovePeriodSpeedUp);
+			}
+			snekMoveCounter += dt;
+			if( snekMoveCounter >= snekMovePeriodSpeedUp )
+			{
+				snekMoveCounter -= snekMovePeriodSpeedUp;
 				const Location next = snek.GetNextHeadLocation( delta_loc );
 				if( !brd.IsInsideBoard( next ) ||
-					snek.IsInTileExceptEnd( next ) )
+					snek.IsInTileExceptEnd( next ) || brd.CheckForObstacle(next) )
 				{
 					gameIsOver = true;
 					sndFart.Play();
@@ -85,6 +89,7 @@ void Game::UpdateModel()
 					{
 						snek.GrowAndMoveBy( delta_loc );
 						goal.Respawn( rng,brd,snek );
+						brd.SpawnObstacle(rng, snek, goal);
 						sfxEat.Play( rng,0.8f );
 					}
 					else
@@ -113,6 +118,7 @@ void Game::ComposeFrame()
 	{
 		snek.Draw( brd );
 		goal.Draw( brd );
+		brd.DrawObstacle();
 		if( gameIsOver )
 		{
 			SpriteCodex::DrawGameOver( 350,265,gfx );
