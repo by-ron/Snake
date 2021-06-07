@@ -22,15 +22,15 @@
 #include "Game.h"
 #include "SpriteCodex.h"
 
-Game::Game( MainWindow& wnd )
+Game::Game(MainWindow& wnd)
 	:
-	wnd( wnd ),
-	gfx( wnd ),
-	brd( gfx ),
-	rng( std::random_device()() ),
-	snek( {2,2} ),
-	goal( rng,brd,snek )
+	wnd(wnd),
+	gfx(wnd),
+	brd(gfx),
+	rng(std::random_device()()),
+	snek({ 2,2 })
 {
+	brd.SpawnFood(rng, snek);
 	sndTitle.Play( 1.0f,1.0f );
 }
 
@@ -76,8 +76,9 @@ void Game::UpdateModel()
 			{
 				snekMoveCounter -= snekMovePeriodSpeedUp;
 				const Location next = snek.GetNextHeadLocation( delta_loc );
+				const int contents = brd.GetContents(next);
 				if( !brd.IsInsideBoard( next ) ||
-					snek.IsInTileExceptEnd( next ) || brd.CheckForObstacle(next) )
+					snek.IsInTileExceptEnd( next ) || contents == 1 )
 				{
 					gameIsOver = true;
 					sndFart.Play();
@@ -85,11 +86,12 @@ void Game::UpdateModel()
 				}
 				else
 				{
-					if( next == goal.GetLocation() )
+					if( contents == 2 )
 					{
 						snek.GrowAndMoveBy( delta_loc );
-						goal.Respawn( rng,brd,snek );
-						brd.SpawnObstacle(rng, snek, goal);
+						brd.ConsumeContents(next);
+						brd.SpawnFood(rng, snek);
+						brd.SpawnObstacle(rng, snek);
 						sfxEat.Play( rng,0.8f );
 					}
 					else
@@ -117,8 +119,7 @@ void Game::ComposeFrame()
 	if( gameIsStarted )
 	{
 		snek.Draw( brd );
-		goal.Draw( brd );
-		brd.DrawObstacle();
+		brd.DrawCells();
 		if( gameIsOver )
 		{
 			SpriteCodex::DrawGameOver( 350,265,gfx );
