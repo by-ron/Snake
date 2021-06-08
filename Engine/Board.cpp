@@ -87,17 +87,17 @@ void Board::DrawCells()
 		for (int x = 0; x < width; x++)
 		{
 			const CellContents contents = GetContents({ x, y });
-			if (contents == CellContents::Obstacle)
+			switch (contents)
 			{
-				DrawCell({x, y}, obstacleColor);
-			}
-			else if (contents == CellContents::Food)
-			{
+			case CellContents::Obstacle:
+				DrawCell({ x, y }, obstacleColor);
+				break;
+			case CellContents::Food:
 				DrawCell({ x, y }, foodColor);
-			}
-			else if (contents == CellContents::Poison)
-			{
+				break;
+			case CellContents::Poison:
 				DrawCell({ x, y }, poisonColor);
+				break;
 			}
 		}
 	}
